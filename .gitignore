@@ -1,2 +1,3 @@
 *.sqlite
 t.txt
+cache.json
