@@ -463,7 +463,10 @@ def input_constraint(res_list, kd_tree):
     lat = []
     lon = []
     rating = []
+    r_l = []
 
+    
+   
     for idx in res_idx_list:
         res = res_list[idx[2]]
 
@@ -474,36 +477,74 @@ def input_constraint(res_list, kd_tree):
             lat.append(res.lat)
             lon.append(res.lon)
             rating.append(res.rating)
-
-
-    fig = go.Figure(
-        go.Scattermapbox(
-            text=text,
-            lat=lat,
-            lon=lon,
-            mode='markers',
-            marker=go.scattermapbox.Marker(color=rating,colorbar=dict(title="ratings"))          
-    ))
+            r_l.append(res)
     
-    trace2 = go.Scattermapbox(
-        lat=[cur_lat],
-        lon=[cur_lon],
-        text='Your Current Location',
-        mode='markers',
-        marker=go.scattermapbox.Marker(color='red', size = math.floor(max_d)*2)    
-    )
-    fig.add_trace(trace2)
-    fig.update_layout(
-        dict(
-            autosize=True,
-            mapbox=go.layout.Mapbox(
-                accesstoken=MAPBOX_TOKEN,
-                center=go.layout.mapbox.Center(lat=res_list[0].lat,lon=res_list[0].lon),
-                zoom=15
-            )                     
-        )               
-    )
-    fig.show()
+    while True:
+        print("\np1: Show all restaurants on map with the constraint")
+        print("p2: Plot all restaurants by rating with the constraint")
+        print("p3: Plot all restaurants by price with the constraint")
+        print("0:  Go back to previous options")
+        cin = input("\nChoose a plot given constraint: ")     
+        if cin == "p1":
+                
+            fig = go.Figure(
+                go.Scattermapbox(
+                    text=text,
+                    lat=lat,
+                    lon=lon,
+                    mode='markers',
+                    marker=go.scattermapbox.Marker(color=rating,colorbar=dict(title="ratings"))          
+            ))
+            
+            trace2 = go.Scattermapbox(
+                lat=[cur_lat],
+                lon=[cur_lon],
+                text='Your Current Location',
+                mode='markers',
+                marker=go.scattermapbox.Marker(color='red', size = 15)    
+            )
+            fig.add_trace(trace2)
+            fig.update_layout(
+                dict(
+                    autosize=True,
+                    mapbox=go.layout.Mapbox(
+                        accesstoken=MAPBOX_TOKEN,
+                        center=go.layout.mapbox.Center(lat=res_list[0].lat,lon=res_list[0].lon),
+                        zoom=15
+                    )                     
+                )               
+            )
+            fig.show()
+        elif cin == "p2":
+            r_l2 = sorted(r_l, key=lambda x: x.rating, reverse=True)
+            rate2 = []
+            name2 = []
+            for res in r_l2:
+                rate2.append(res.rating)
+                name2.append(res.name)
+            fig = go.Figure(
+                go.Bar(x=name,y=rate2),
+            )
+            fig.update_yaxes(title_text="Rating")
+            fig.show()
+        elif cin == "p3":
+            r_l3 = sorted(r_l, key=lambda x: x.price, reverse=True)
+            price3 = []
+            name3 = []
+            for res in r_l3:
+                name3.append(res.name)
+                price3.append(res.price)
+            fig = go.Figure(
+                go.Bar(x=name3,y=price3),
+            )
+            fig.update_yaxes(title_text="Price")
+            fig.show()
+        elif cin == "0":
+            break
+        else:
+            print("Please Enter a valid command")
+
+    
 
 
     
@@ -529,9 +570,9 @@ def input_options(state,city, res_list):
         review_num.append(res.review_num)
     while True:
         print("\nEnter a restaurant number for detailed information, or select a plot for data visualization (p1, p2 and etc)")
-        print("p1: Plot all restaurants on map")
-        print("p2: Sort all restaurants by rating")
-        print("p3: Sort all restaurants by price")
+        print("p1: Show all restaurants on map")
+        print("p2: Plot all restaurants by rating")
+        print("p3: Plot all restaurants by price")
         print("p4: Set constraints and plot restaurants")
         print("0: Select another city")
         cin = input("\nEnter a number or a plot: ")     
@@ -600,10 +641,20 @@ def main():
     CACHE = load_from_cache(CACHE_FILE_NAME)
     state_city_dict, states_list, cities_list = init_state_city(CACHE)
     init_cities_db(state_city_dict)
+
     global YELP_API_KEY
-    YELP_API_KEY = input("Please enter your yelp api key (https://www.yelp.com/developers/documentation/v3/get_started): ")
-    global MAPBOX_TOKEN 
-    MAPBOX_TOKEN = input("Please enter your mapbox access token (https://docs.mapbox.com/help/getting-started/access-tokens): ")
+    if "YELP_API_KEY" not in CACHE:
+        YELP_API_KEY = input("Please enter your yelp api key (https://www.yelp.com/developers/documentation/v3/get_started): ")      
+        CACHE["YELP_API_KEY"] = YELP_API_KEY
+    else:
+        YELP_API_KEY = CACHE["YELP_API_KEY"]
+
+    global MAPBOX_TOKEN
+    if "MAPBOX_TOKEN" not in CACHE: 
+        MAPBOX_TOKEN = input("Please enter your mapbox access token (https://docs.mapbox.com/help/getting-started/access-tokens): ")
+        CACHE["MAPBOX_TOKEN"] = MAPBOX_TOKEN
+    else:
+        MAPBOX_TOKEN = CACHE["MAPBOX_TOKEN"]
     global HEADERS
     HEADERS = {'Authorization': f'Bearer {YELP_API_KEY}'}
     while True:
