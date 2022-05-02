@@ -139,8 +139,8 @@ def nodes_within_distance(tree, x, y, d):
 #     return (x1-x2)**2 + (y1-y2)**2 <= d**2
 
 def calc_distance(lat1, lon1, lat2, lon2):
-    """Calculate the distance between two points given lattitude and longitude"""
-    # convert lattitude and longitude to radian
+    """Calculate the distance between two points given latitude and longitude"""
+    # convert latitude and longitude to radian
     lat1 = lat1/(180/math.pi) 
     lat2 = lat2/(180/math.pi) 
     lon1 = lon1/(180/math.pi) 
@@ -232,12 +232,12 @@ def make_api_request(baseurl, params):
     return CACHE[cache_key]
 
     
-def yelp_api_request(city, term="restaurants"):
+def yelp_api_request(city, business_type="restaurants"):
     """
-    Fetch information from yelp based on city and term (restaurant,cafe and etc)
+    Fetch information from yelp based on city and business type (restaurant, and etc)
     """
     baseurl = "https://api.yelp.com/v3/businesses/search"
-    params = {"location": city,"term": term}
+    params = {"location": city,"term": business_type}
     return make_api_request(baseurl, params)
 
 
@@ -382,7 +382,7 @@ def build_restaurants_list(city_idx, state_idx, city):
     CACHE["cache_info"][state][city]["kd_tree"] = build_kd_tree(tree_list, 0)
 
     save_to_cache(CACHE_FILE_NAME, CACHE)
-    
+    # save_to_cache("sample_kd_tree_AnnArbor.json", CACHE["cache_info"][state][city]["kd_tree"])
     return res_list
 
 
@@ -448,10 +448,10 @@ def input_constraint(res_list, kd_tree):
     cur_lat = g.latlng[0]
     cur_lon = g.latlng[1]
 
-    print(f"\n1: Use my current location (lattitude:{cur_lat}, longitude:{cur_lon})")
+    print(f"\n1: Use my current location (latitude:{cur_lat}, longitude:{cur_lon})")
     print("2: Use a custom location")
     if int(input("Please enter your choice: ")) != 1:
-        cur_lat = float(input("Please enter your lattitude: "))
+        cur_lat = float(input("Please enter your latitude: "))
         cur_lon = float(input("Please enter your longitude: "))
     max_d = float(input("Please enter a maximum distance in km: "))
 
@@ -574,6 +574,7 @@ def input_options(state,city, res_list):
         print("p2: Plot all restaurants by rating")
         print("p3: Plot all restaurants by price")
         print("p4: Set constraints and plot restaurants")
+        print("p5: Plot a pie chart for review number of all restaurants")
         print("0: Select another city")
         cin = input("\nEnter a number or a plot: ")     
         if cin == "p1":
@@ -600,7 +601,7 @@ def input_options(state,city, res_list):
             fig.show()
         elif cin == "p2":
             fig = go.Figure(
-                go.Bar(x=name,y=rating),
+                go.Bar(x=name,y=rating,text=text),
             )
             fig.update_yaxes(title_text="Rating")
             fig.show()
@@ -619,6 +620,13 @@ def input_options(state,city, res_list):
         elif cin == "p4":
             kd_tree = CACHE["cache_info"][state][city]["kd_tree"]
             input_constraint(res_list, kd_tree)
+
+        elif cin == "p5":
+            fig = go.Figure(
+                go.Pie(labels=text, values=review_num),
+            )
+            fig.show()
+           
             
         elif cin.isdigit():
             if int(cin) == 0:
