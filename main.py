@@ -553,7 +553,7 @@ def input_options(state,city, res_list):
     """
     Helper function to prompt the user to enter options for data visualization
     """
-    res_list.sort(key=lambda x: x.rating, reverse=True)
+    
     name = []
     text = []
     lat = []
@@ -600,8 +600,19 @@ def input_options(state,city, res_list):
             )
             fig.show()
         elif cin == "p2":
+            res_list2 = res_list[:]
+            res_list2.sort(key=lambda x: x.rating, reverse=True)
+            rating2 = []
+            text2 = []
+            name2 = []
+
+            for res in res_list2:
+                name2.append(res.name)            
+                text2.append(res.print_res())             
+                rating2.append(res.rating)
+
             fig = go.Figure(
-                go.Bar(x=name,y=rating,text=text),
+                go.Bar(x=name2,y=rating2,text=text2),
             )
             fig.update_yaxes(title_text="Rating")
             fig.show()
