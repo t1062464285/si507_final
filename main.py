@@ -575,7 +575,7 @@ def input_options(state,city, res_list):
         print("p3: Plot all restaurants by price")
         print("p4: Set constraints and plot restaurants")
         print("p5: Plot a pie chart for review number of all restaurants")
-        print("0: Select another city")
+        print("0: Select another state")
         cin = input("\nEnter a number or a plot: ")     
         if cin == "p1":
             
